@@ -53,5 +53,5 @@ class Cell:
         to_point = Point(to_x, to_y)
         if undo:
             fill_colour = "gray"
-        self._win.draw_line(Line(current_point, to_point), fill_colour)
+        self._win.draw_line(Line(current_point, to_point), fill_colour, 4)
         
