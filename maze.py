@@ -1,4 +1,5 @@
-import time, random
+import time
+import random
 from cell import Cell
 from graphics import Point
 
@@ -12,9 +13,12 @@ class Maze:
         self._cell_size_y = cell_size_y
         self._win = win
         self._cells = []
-        self._create_cells()
         if seed is not None:
-            self._seed = random.seed(seed)
+            random.seed(seed)
+        
+        self._create_cells()
+        self._break_entrance_and_exit()
+        self._break_walls_r(0, 0)
     
     def _create_cells(self):
         if self._win is None:
@@ -27,8 +31,6 @@ class Maze:
         for i in range(self._num_cols):
             for j in range(self._num_rows):
                 self._draw_cell(i, j)
-        self._break_entrance_and_exit()
-        self._break_walls_r(0, 0)
 
     def _draw_cell(self, i, j):
         x1 = self._x1 + (i * self._cell_size_x)
@@ -49,36 +51,46 @@ class Maze:
         self._draw_cell(self._num_cols - 1, self._num_rows - 1)
 
     def _break_walls_r(self, i, j):
-        current_cell = self._cells[i][j]
-        current_cell.visited = True
+        self._cells[i][j].visited = True
         while True:
             to_visit = []
-            if i + 1 < self._num_cols and not self._cells[i + 1][j].visited:
+            
+            if i < self._num_cols - 1 and not self._cells[i + 1][j].visited:
                 to_visit.append((i + 1, j))
-            if i - 1 < self._num_cols and i - 1 > 0 and not self._cells[i - 1][j].visited:
+            if i > 0 and not self._cells[i - 1][j].visited:
                 to_visit.append((i - 1, j))
-            if j + 1 < self._num_rows and not self._cells[i][j + 1].visited:
-                to_visit.append((i, j + 1)) 
-            if j - 1 < self._num_cols and j - 1 > 0 and not self._cells[i][j - 1].visited:
-                to_visit.append((i, j - 1))
-            if to_visit == []:
+            if j < self._num_rows - 1 and not self._cells[i][j + 1].visited:
+                to_visit.append((i, j + 1))
+            if j > 0 and not self._cells[i][j - 1].visited:
+                to_visit.append((i, j -1))
+
+            if len(to_visit) == 0:
                 self._draw_cell(i, j)
                 return
-            direction = random.randint(0, len(to_visit) - 1)
-            chosen_cell = self._cells[to_visit[direction][0]][to_visit[direction][1]]
-            if current_cell._x2 == chosen_cell._x1 and current_cell._y1 == current_cell._y1:
-                current_cell.has_right_wall = False
-                chosen_cell.has_left_wall = False
-            if current_cell._x1 == chosen_cell._x2 and current_cell._y1 == current_cell._y1:
-                current_cell.has_left_wall = False
-                chosen_cell.has_right_wall = False
-            if current_cell._y2 == chosen_cell._y1 and current_cell._x1 == current_cell._x2:
-                current_cell.has_bottom_wall = False
-                chosen_cell.has_top_wall = False
-            if current_cell._y1 == chosen_cell._y2 and current_cell._x1 == current_cell._x2:
-                current_cell.has_top_wall = False
-                chosen_cell.has_bottom_wall = False
-            self._draw_cell(i, j)
-            self._break_walls_r(to_visit[direction][0], to_visit[direction][1])
             
-          
+            print(to_visit)
+            direction = random.randrange(len(to_visit))
+            print(direction)
+            visit_index = to_visit[direction]
+            print(visit_index)
+
+            if visit_index[0] == i + 1:
+                self._cells[i][j].has_right_wall = False
+                self._cells[i + 1][j].has_left_wall = False
+            if visit_index[0] == i - 1:
+                self._cells[i][j].has_left_wall = False
+                self._cells[i - 1][j].has_right_wall = False
+            if visit_index[1] == j + 1:
+                self._cells[i][j].has_bottom_wall = False
+                self._cells[i][j + 1].has_top_wall = False
+            if visit_index[1] == j - 1:
+                self._cells[i][j].has_top_wall = False
+                self._cells[i][j - 1].has_bottom_wall = False
+            
+            self._break_walls_r(visit_index[0], visit_index[1])
+
+            
+
+
+                
+            
